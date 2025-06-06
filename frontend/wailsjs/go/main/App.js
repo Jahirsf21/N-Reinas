@@ -9,3 +9,7 @@ export function AlgoritmoNReinas(arg1, arg2) {
 export function CreateBoard(arg1) {
   return window['go']['main']['App']['CreateBoard'](arg1);
 }
+
+export function ValidarMovimiento(arg1, arg2, arg3) {
+  return window['go']['main']['App']['ValidarMovimiento'](arg1, arg2, arg3);
+}

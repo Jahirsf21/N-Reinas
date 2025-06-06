@@ -2,12 +2,14 @@
 import { useRouter } from 'vue-router'
 import { ref } from 'vue'
 
+
 const router = useRouter()
 
 const savedData = JSON.parse(sessionStorage.getItem('gameData') || '{}')
 const board = ref(savedData?.board || []) 
 const queens = ref(savedData?.queens)
 const gameLog = ref([])
+const blockedCells = ref([])
 
 const goHome = () => {
   sessionStorage.removeItem('gameData')
@@ -15,6 +17,7 @@ const goHome = () => {
 }
 
 const algoritmoNReinas = async () => {
+
 }
 
 </script>
@@ -24,7 +27,7 @@ const algoritmoNReinas = async () => {
     <div class="game-panel">
       <div class="board-grid">
         <div v-for="(row, Row) in board" :key="Row" class="board-row">
-          <div v-for="(cell, Col) in row" :key="Col" class="board-cell" :class="{'light-square': (Row + Col) % 2 === 0, 'dark-square': (Row + Col) % 2 !== 0}">
+          <div v-for="(cell, Col) in row" :key="Col" class="board-cell" :class="{'light-square': (Row + Col) % 2 === 0, 'dark-square': (Row + Col) % 2 !== 0, 'blocked-cell': blockedCells.some(([r, c]) => r === Row && c === Col)}">
             <span v-if="cell === 1" class="queen-symbol">♛</span>
           </div>
         </div>
@@ -177,5 +180,11 @@ const algoritmoNReinas = async () => {
   color: #2c3e50;
   text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
 }
+
+.blocked-cell {
+  background-color: rgba(255, 0, 0, 0.4); /* rojo semitransparente */
+  box-shadow: inset 0 0 0 2px red;
+}
+
 
 </style>
