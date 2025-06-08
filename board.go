@@ -1,5 +1,11 @@
 package main
 
+import (
+	"time"
+	"github.com/wailsapp/wails/v2/pkg/runtime"
+	"strconv"
+)
+
 func (a *App) CreateBoard(size int) [][]int {
 	var board [][]int
 	for range size {
@@ -12,8 +18,8 @@ func (a *App) CreateBoard(size int) [][]int {
 	return board
 }
 
-func Reescribir(matrix [][]int, areglo [][]int) [][]int {
-	for _, cordenadas := range areglo {
+func (a *App) Reescribir(matrix, arreglo [][]int) [][]int {
+	for _, cordenadas := range arreglo {
 		x := cordenadas[0]
 		y := cordenadas[1]
 		matrix[x][y] = 2
@@ -22,7 +28,19 @@ func Reescribir(matrix [][]int, areglo [][]int) [][]int {
 	return matrix
 }
 
-func EntradasPermitidas(matrix [][]int) [][]int {
+func(a *App) CopiarMatriz(matrix [][]int) [][]int {
+	n := len(matrix)
+	copia := make([][]int, n)
+	for i := range matrix {
+		copia[i] = make([]int, len(matrix[i]))
+		copy(copia[i], matrix[i])
+	}
+	return copia
+}
+
+
+
+func (a *App) EntradasPermitidas(matrix [][]int) [][]int {
 	var lista [][]int
 
 	for x := range matrix {
@@ -35,7 +53,7 @@ func EntradasPermitidas(matrix [][]int) [][]int {
 	return lista
 }
 
-func ValidarMovimiento(board [][]int, row, col int) [][]int {
+func (a *App) ValidarMovimiento(board [][]int, row, col int) [][]int {
 	size := len(board)
 	posiciones := [][]int{}
 
@@ -70,32 +88,56 @@ func ValidarMovimiento(board [][]int, row, col int) [][]int {
 	return posiciones
 }
 
-func (a *App) AlgoritmoNReinas(board [][]int, queens int) (bool, [][]int) {
-	board[0][0] = 1
-	return AlgoritmoNReinas_Aux(board, queens)
+
+func (a *App) AlgoritmoNReinas(board [][]int, queens int)  {
+
+	cleanBoard := a.CreateBoard(len(board))
+	a.AlgoritmoNReinas_Aux(cleanBoard,queens)
+	
 }
 
-func AlgoritmoNReinas_Aux(board [][]int, queens int) (bool, [][]int) {
+func (a *App) AlgoritmoNReinas_Aux(board [][]int, queens int) bool {
+
 	if queens == 0 {
-		return true, board
+		runtime.EventsEmit(a.ctx, "algorithm-log", "¡Solución encontrada!")
+		runtime.EventsEmit(a.ctx, "algorithm-finished", true)
+		return true
 	}
 
-	var posibles = EntradasPermitidas(board)
+	posibles := a.EntradasPermitidas(board)
+    
+    if len(posibles) == 0 && queens > 0 {
+        return false
+    }
 
 	for _, posicion := range posibles {
-		var x, y = posicion[0], posicion[1]
+		x, y := posicion[0], posicion[1]
+		
+		nuevoTablero := a.CopiarMatriz(board)
 
-		var nuevoTablero = board
-		nuevoTablero[x][y] = 1
 
-		var bloqueos = ValidarMovimiento(nuevoTablero, x, y)
-		nuevoTablero = Reescribir(nuevoTablero, bloqueos)
+		nuevoTablero[x][y] = 1 
 
-		var cumplido, res = AlgoritmoNReinas_Aux(nuevoTablero, queens-1)
-		if cumplido {
-			return true, res
+		bloqueos := a.ValidarMovimiento(nuevoTablero, x, y)
+		nuevoTablero = a.Reescribir(nuevoTablero, bloqueos)
+
+		runtime.EventsEmit(a.ctx, "board-update", nuevoTablero)
+
+		runtime.EventsEmit(a.ctx, "algorithm-log", "Intentando reina en ("+strconv.Itoa(x)+", "+strconv.Itoa(y)+")")
+
+		time.Sleep(1000 * time.Millisecond)
+
+		if a.AlgoritmoNReinas_Aux(nuevoTablero, queens-1) {
+			return true 
 		}
-	}
+		
+		runtime.EventsEmit(a.ctx, "board-update", board) 
 
-	return false, board
+		runtime.EventsEmit(a.ctx, "algorithm-log", "Se regresa desde ("+strconv.Itoa(x)+", "+strconv.Itoa(y)+")")
+
+		time.Sleep(1000 * time.Millisecond)
+	}
+	
+	return false
 }
+

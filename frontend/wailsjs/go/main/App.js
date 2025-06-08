@@ -6,8 +6,24 @@ export function AlgoritmoNReinas(arg1, arg2) {
   return window['go']['main']['App']['AlgoritmoNReinas'](arg1, arg2);
 }
 
+export function AlgoritmoNReinas_Aux(arg1, arg2) {
+  return window['go']['main']['App']['AlgoritmoNReinas_Aux'](arg1, arg2);
+}
+
+export function CopiarMatriz(arg1) {
+  return window['go']['main']['App']['CopiarMatriz'](arg1);
+}
+
 export function CreateBoard(arg1) {
   return window['go']['main']['App']['CreateBoard'](arg1);
+}
+
+export function EntradasPermitidas(arg1) {
+  return window['go']['main']['App']['EntradasPermitidas'](arg1);
+}
+
+export function Reescribir(arg1, arg2) {
+  return window['go']['main']['App']['Reescribir'](arg1, arg2);
 }
 
 export function ValidarMovimiento(arg1, arg2, arg3) {

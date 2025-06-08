@@ -3,6 +3,14 @@
 
 export function AlgoritmoNReinas(arg1:Array<any>,arg2:number):Promise<void>;
 
+export function AlgoritmoNReinas_Aux(arg1:Array<any>,arg2:number):Promise<boolean>;
+
+export function CopiarMatriz(arg1:Array<any>):Promise<Array<any>>;
+
 export function CreateBoard(arg1:number):Promise<Array<any>>;
+
+export function EntradasPermitidas(arg1:Array<any>):Promise<Array<any>>;
+
+export function Reescribir(arg1:Array<any>,arg2:Array<any>):Promise<Array<any>>;
 
 export function ValidarMovimiento(arg1:Array<any>,arg2:number,arg3:number):Promise<Array<any>>;
