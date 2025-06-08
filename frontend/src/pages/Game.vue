@@ -1,6 +1,6 @@
 <script setup>
 import { useRouter } from 'vue-router'
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, nextTick } from 'vue'
 import { AlgoritmoNReinas } from '../../wailsjs/go/main/App'
 import { EventsOn, EventsOff } from '../../wailsjs/runtime/runtime.js'
 
@@ -12,39 +12,62 @@ const queens = ref(savedData?.queens)
 const gameLog = ref([])
 const isRunning = ref(false) 
 
+/*
+  Function to return to the main page.
+  Clears the game session data and redirects the user to the main page.
+*/
 const goHome = () => {
   sessionStorage.removeItem('gameData')
   router.push({ name: 'Home' })
 }
 
+/*
+  Function to run the backend N-Queens algorithm
+*/
 const startAlgorithm = () => {
-  if (isRunning.value) return; 
-  isRunning.value = true;
-  gameLog.value = [] 
+  if (isRunning.value) return;
+  isRunning.value = true; // State to disable buttons if the algorithm is running
+  gameLog.value = [] // Clears the log file in case the algorithm is run again
   gameLog.value.push('Iniciando algoritmo...')
-  AlgoritmoNReinas(board.value, queens.value)
+  AlgoritmoNReinas(board.value, queens.value) // Call to the backend function, each step will be emitted via events
 }
 
 
 onMounted(() => {
+  /*
+    Function responsible for listening for board-update events issued from the backend.
+    Updates the board based on the event issued from the backend.
+  */
   EventsOn('board-update', (newBoardState) => {
     board.value = newBoardState
   })
 
+  /*
+    Function responsible for listening for algorithm-log events emitted from the backend.
+    Adds the message emitted from the backend event to the gameLog array.
+  */
   EventsOn('algorithm-log', (message) => {
     gameLog.value.push(message)
-    const logContent = document.querySelector('.log-content');
-    if (logContent) {
-        logContent.scrollTop = logContent.scrollHeight;
-    }
+    nextTick(()=> {
+      const logContent = document.querySelector('.log-content');
+      if (logContent) {
+          logContent.scrollTop = logContent.scrollHeight;
+      }
+    })
   })
-
+  /*
+    Function responsible for listening for algorithm-finish events issued from the backend.
+    Allows you to know if the algorithm execution has finished and displays the corresponding message and re-enables the buttons.
+  */
   EventsOn('algorithm-finished', (wasSuccessful) => {
       isRunning.value = false
       gameLog.value.push(wasSuccessful ? '¡Algoritmo completado!' : 'No se encontró solución.')
   })
 })
 
+/*
+  Function responsible for turning off event listeners before changing pages or components.
+*/
 onUnmounted(() => {
     EventsOff('board-update')
     EventsOff('algorithm-log')
