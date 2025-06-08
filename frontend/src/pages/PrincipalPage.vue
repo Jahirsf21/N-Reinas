@@ -30,11 +30,6 @@ const startGame = async () => {
     return
   }
 
-  if (queenCount > boardSize*boardSize) {
-      errorMessage.value = 'No puede haber más reinas que el tamaño del tablero.'
-      return
-  }
-
   try {
 
     board.value = await CreateBoard(size.value)
