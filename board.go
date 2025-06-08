@@ -1,11 +1,20 @@
 package main
 
+/**
+* time: to handle delays in the algorithm
+* runtime: to emit events to the frontend (Wails)
+* strconv: to convert integers to strings
+ */
 import (
-	"time"
-	"github.com/wailsapp/wails/v2/pkg/runtime"
 	"strconv"
+	"time"
+
+	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
+/**
+* Creates a size x size board initialized with zeros.
+ */
 func (a *App) CreateBoard(size int) [][]int {
 	var board [][]int
 	for range size {
@@ -18,6 +27,9 @@ func (a *App) CreateBoard(size int) [][]int {
 	return board
 }
 
+/**
+* Sets cells in the board to 2 using positions from an array given
+ */
 func (a *App) Reescribir(matrix, arreglo [][]int) [][]int {
 	for _, cordenadas := range arreglo {
 		x := cordenadas[0]
@@ -28,7 +40,11 @@ func (a *App) Reescribir(matrix, arreglo [][]int) [][]int {
 	return matrix
 }
 
-func(a *App) CopiarMatriz(matrix [][]int) [][]int {
+/**
+* Makes a copy of the matrix
+* Returns the copy
+ */
+func (a *App) CopiarMatriz(matrix [][]int) [][]int {
 	n := len(matrix)
 	copia := make([][]int, n)
 	for i := range matrix {
@@ -38,8 +54,10 @@ func(a *App) CopiarMatriz(matrix [][]int) [][]int {
 	return copia
 }
 
-
-
+/**
+* Finds all available (0) positions on the board.
+* Return the list with all the positions found.
+ */
 func (a *App) EntradasPermitidas(matrix [][]int) [][]int {
 	var lista [][]int
 
@@ -53,6 +71,10 @@ func (a *App) EntradasPermitidas(matrix [][]int) [][]int {
 	return lista
 }
 
+/**
+* Returns a list of positions attacked by a queen placed at (row, col).
+* It includes the same row, column, and all diagonals.
+ */
 func (a *App) ValidarMovimiento(board [][]int, row, col int) [][]int {
 	size := len(board)
 	posiciones := [][]int{}
@@ -88,14 +110,23 @@ func (a *App) ValidarMovimiento(board [][]int, row, col int) [][]int {
 	return posiciones
 }
 
+/**
+* Initializes an empty board and starts the N-Queens backtracking algorithm.
+* Sends an event when the algorithm finishes with or without a solution.
+ */
 func (a *App) AlgoritmoNReinas(board [][]int, queens int) {
 	cleanBoard := a.CreateBoard(len(board))
 	encontrado := a.AlgoritmoNReinas_Aux(cleanBoard, queens)
 	if !encontrado {
-		runtime.EventsEmit(a.ctx, "algorithm-finished", false) 
+		runtime.EventsEmit(a.ctx, "algorithm-finished", false)
 	}
 }
 
+/**
+* Recursive function to try placing queens.
+* At each step, it updates the board, blocks threatened positions, and tries the next queen.
+* Emits events for visual updates and logs the decision-making process.
+ */
 func (a *App) AlgoritmoNReinas_Aux(board [][]int, queens int) bool {
 
 	if queens == 0 {
@@ -104,18 +135,17 @@ func (a *App) AlgoritmoNReinas_Aux(board [][]int, queens int) bool {
 	}
 
 	posibles := a.EntradasPermitidas(board)
-    
-    if len(posibles) == 0 && queens > 0 {
-        return false
-    }
+
+	if len(posibles) == 0 && queens > 0 {
+		return false
+	}
 
 	for _, posicion := range posibles {
 		x, y := posicion[0], posicion[1]
-		
+
 		nuevoTablero := a.CopiarMatriz(board)
 
-
-		nuevoTablero[x][y] = 1 
+		nuevoTablero[x][y] = 1
 
 		bloqueos := a.ValidarMovimiento(nuevoTablero, x, y)
 		nuevoTablero = a.Reescribir(nuevoTablero, bloqueos)
@@ -127,10 +157,10 @@ func (a *App) AlgoritmoNReinas_Aux(board [][]int, queens int) bool {
 		time.Sleep(500 * time.Millisecond)
 
 		if a.AlgoritmoNReinas_Aux(nuevoTablero, queens-1) {
-			return true 
+			return true
 		}
-		
-		runtime.EventsEmit(a.ctx, "board-update", board) 
+
+		runtime.EventsEmit(a.ctx, "board-update", board)
 
 		runtime.EventsEmit(a.ctx, "algorithm-log", "Se regresa desde ("+strconv.Itoa(x)+", "+strconv.Itoa(y)+")")
 
@@ -139,4 +169,3 @@ func (a *App) AlgoritmoNReinas_Aux(board [][]int, queens int) bool {
 
 	return false
 }
-
