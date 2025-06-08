@@ -10,7 +10,10 @@ const queens = ref(null)
 const board = ref([])
 
 const errorMessage = ref('')
-
+/**
+* Function that validates user input, generates the board from the backend
+* and redirects to the game view if everything is correct.
+*/
 const startGame = async () => { 
   errorMessage.value = ''
 
