@@ -88,18 +88,17 @@ func (a *App) ValidarMovimiento(board [][]int, row, col int) [][]int {
 	return posiciones
 }
 
-
-func (a *App) AlgoritmoNReinas(board [][]int, queens int)  {
-
+func (a *App) AlgoritmoNReinas(board [][]int, queens int) {
 	cleanBoard := a.CreateBoard(len(board))
-	a.AlgoritmoNReinas_Aux(cleanBoard,queens)
-	
+	encontrado := a.AlgoritmoNReinas_Aux(cleanBoard, queens)
+	if !encontrado {
+		runtime.EventsEmit(a.ctx, "algorithm-finished", false) 
+	}
 }
 
 func (a *App) AlgoritmoNReinas_Aux(board [][]int, queens int) bool {
 
 	if queens == 0 {
-		runtime.EventsEmit(a.ctx, "algorithm-log", "¡Solución encontrada!")
 		runtime.EventsEmit(a.ctx, "algorithm-finished", true)
 		return true
 	}
@@ -125,7 +124,7 @@ func (a *App) AlgoritmoNReinas_Aux(board [][]int, queens int) bool {
 
 		runtime.EventsEmit(a.ctx, "algorithm-log", "Intentando reina en ("+strconv.Itoa(x)+", "+strconv.Itoa(y)+")")
 
-		time.Sleep(1000 * time.Millisecond)
+		time.Sleep(500 * time.Millisecond)
 
 		if a.AlgoritmoNReinas_Aux(nuevoTablero, queens-1) {
 			return true 
@@ -135,9 +134,9 @@ func (a *App) AlgoritmoNReinas_Aux(board [][]int, queens int) bool {
 
 		runtime.EventsEmit(a.ctx, "algorithm-log", "Se regresa desde ("+strconv.Itoa(x)+", "+strconv.Itoa(y)+")")
 
-		time.Sleep(1000 * time.Millisecond)
+		time.Sleep(500 * time.Millisecond)
 	}
-	
+
 	return false
 }
 
